@@ -1,7 +1,15 @@
-rmemptydirs <- function(drname,filelist,arg){
-	if(length(filelist) == 0)
-		print(drname)
 
+
+#remove empty dirs
+rmemptydirs <- function(drname,filelist,arg){
+	arg <- 0
+	if(length(filelist) == 0)
+	{
+		#directory has no files/ directories then remove it
+		unlink(drname,recursive=TRUE)
+	}
+
+	return(arg)
 
 
 
@@ -20,10 +28,6 @@ nbytes <- function(drname,filelist,arg){
 		arg <- arg + file.size(obj)
 	}
 
-	# if(arg == NA)
-	# {
-	# 	arg = 0
-	# }
 
 	return(arg);
 
@@ -51,19 +55,26 @@ walk <- function(currdir,f,arg,firstcall=TRUE){
 	j <- 1
 	# print("Iterating through dirlist")
 	 for (object in dirlist) {
+
+	 	#store files in one list
     	if (!file.info(object)$isdir) {
-    			#print(object)
-    			#print("Found file")
+  
     			flist[[i]]<-object 
     			i <- i+1
 
+
+
+
 	 	}
+	 	#store directories in the other
 	 	else{
 	 		#print("Found directory")
 	 		dlist[[j]]<-object
 	 		j <- j+1
 	 		
 	 	}
+
+
 	 }
 	 # print(flist)
 
@@ -72,32 +83,31 @@ walk <- function(currdir,f,arg,firstcall=TRUE){
 	 if(length(dlist) == 0)
 	 {
 	 	# no subdirectories in current directory so need to go back up a level
-	 	# print("No directories here")
-	 	# print(firstcall)
+
 	 	f <- match.fun(f)
+	 	drname <- currdir
 		arg <- f(drname,flist,arg)
 		setwd("..")
-		# print(arg)
 	 	return (arg);
 	 }
 
 	 else
 	 {
 		 h <- 1
+		 #traverse through list of directories and call walk on each
 		 for (dir in dlist)
 		 {
 
 		 	drname <- dlist[h]
 		 	drname <- paste(getwd(), drname, sep="/")
+		 	print(drname)
 		 	arg<-walk(drname,f,arg,firstcall=FALSE)
 
 		 	#since our argument from our current subdirectory gets updated we must recalulate the next arg to pass into our walk 
 		 	#for the next subdirectory 
 		 	f <- match.fun(f)
 		 	arg <- f(drname,flist,arg)
-		 	# print("Made it out of walk")
-		 	# print(arg)
-		 	
+ 	
 		 	
 		 	h<-h+1
 		 }
@@ -115,12 +125,10 @@ walk <- function(currdir,f,arg,firstcall=TRUE){
 			 	return (arg);
 			 }
 
-		#print("Traversed through directories exiting ")
 
 		f <- match.fun(f)
 		arg <- f(drname,flist,arg)
 		setwd("..")
-		# print(arg)
 
 		 return (arg);
 
